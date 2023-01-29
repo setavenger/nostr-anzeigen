@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {relayURL} from "../constants";
+import {eventTag, relayURL} from "../constants";
 import Ad from "./Ad";
+import {relayInit} from 'nostr-tools'
 
 const Sidebar = () => (
     <aside className="w-64 bg-gray-900 text-white py-10 px-6">
@@ -42,35 +43,37 @@ const Layout = () => {
     const [socket, setSocket] = useState(null);
 
     function parseAdContent(event) {
+        return JSON.parse(event.content)
     }
 
     useEffect(() => {
         setAds([])
-        const socket = new WebSocket(relayURL);
 
-        socket.onopen = () => {
-            // console.log(`WebSocket connection opened to ${relayURL}`);
-            socket.send(JSON.stringify(["REQ", "anzeigen", {"#e": ["f6389df391619512d900f144189e028ee3ac12d846812d4c8f9da869a726d8b0"]}]));
-        };
+        const relay = relayInit(relayURL)
+        relay.connect().then(() => {})
 
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data)
+        relay.on('connect', () => {
+            console.log(`connected to ${relay.url}`)
+        })
+        relay.on('error', () => {
+            console.log(`failed to connect to ${relay.url}`)
+        })
 
-            if (data.length === 2) {
-                //    todo do something or just ignore
-            } else {
-                // todo add additional checks to guarantee that it's actual event data
-                console.log("Value:", data)
-                setAds(prevAds => [...prevAds, JSON.parse(data[2].content)]);
-                console.log(ads)
+        // let's query for an event that exists
+        let sub = relay.sub([
+            {
+                "#e": [eventTag]
             }
-        };
-
-        socket.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
-
-        setSocket(socket)
+        ])
+        sub.on('event', event => {
+            // console.log('we got the event we wanted:', event)
+            console.log(parseAdContent(event))
+            setAds(prevAds =>[...prevAds, parseAdContent(event)])
+        })
+        sub.on('eose', () => {
+            sub.unsub()
+        })
+        setSocket(relay)
 
     }, []);
 
