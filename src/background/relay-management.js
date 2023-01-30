@@ -1,8 +1,19 @@
 import {relayInit} from "nostr-tools";
-import {relayURLS} from "../constants";
+import {relayURLsStandard} from "../constants";
 
-let relays = []
+let relays = [];
+let relayURLS = [];
 
+(function load() {
+    console.log()
+    const localRelays = localStorage.getItem('nostr-anzeigen-relays')
+    if (localRelays === null) {
+        relayURLS = relayURLsStandard
+        localStorage.setItem('nostr-anzeigen-relays', JSON.stringify(relayURLS));
+    } else {
+        relayURLS = JSON.parse(localRelays)
+    }
+})();
 
 relayURLS.map((relayURL) => {
     const relay = relayInit(relayURL)
@@ -38,10 +49,13 @@ export function removeRelay(url) {
     });
 
 
+    localStorage.setItem('nostr-anzeigen-relays', JSON.stringify(relayURLS));
+
     return relays
 }
 
 export function newRelay(url) {
+    relayURLS = [...relayURLS, url]
     const relay = relayInit(url)
     relay.connect().then(() => {
     })
@@ -54,6 +68,9 @@ export function newRelay(url) {
     })
 
     relays = [...relays, relay]
+
+    localStorage.setItem('nostr-anzeigen-relays', JSON.stringify(relayURLS));
+
     return relays
 }
 
