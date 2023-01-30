@@ -1,70 +1,62 @@
-# Getting Started with Create React App
+# NOSTR Anzeigen
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Introduction
 
-## Available Scripts
+This project is supposed to be a decentralized extension of the Project "Sats Kleinanzeigen".
+Sats Kleinanzeigen is a project created by German plebs that mimics Ebay Classifieds (DE: Ebay Kleinanzeigen). 
+As the name Sats already implies payments are made in Satoshis (the smallest unit of Bitcoin).
+<br>
 
-In the project directory, you can run:
+Nostr Anzeigen is the whole thing now thought further.
+A decentralized solution to a telegram channel where people can post ads and find buyers for their old stuff.
+Everyone can host their own nostr relay and host their own ads to make them available to the public.
+You just have to follow the standard described below and your ads will be found if someone is connected to your relay.
 
-### `npm start`
+### Communication Standard
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Nostr Anzeigen uses a simple JSON object for each ad. An example would be:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```json
+{
+  "title": "Selling something",
+  "description": "Expand on your product here. Tell people stuff they should know about it.",
+  "author": "might be removed as the pubkey of the nostr event should be used",
+  "images": [
+    "https://photos.example.com/123456789",
+    "https://photos.example.com/987654321"
+  ],
+  "price": "10.88",
+  "currency": "US Dollar",
+  "location_city": "Berlin, Germany",
+  "category": "shoes" // to be added
+}
+```
 
-### `npm test`
+The plan is to introduce standard categories so filtering becomes easier.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This ad JSON object is then stringified and becomes the content of a nostr event. 
+In the tag we add `f6389df391619512d900f144189e028ee3ac12d846812d4c8f9da869a726d8b0` to identify an ad. 
+The value is the hashed value of "Sats Kleinanzeigen".
 
-### `npm run build`
+```json
+{
+  "id": "a6fc877fe00c9d70e2994af24b114a10ccba126a91d2c9db9b07ff1a230125d9",
+  "pubkey": "d7e183bbf7d61d60bdb159ac925f5dcf7d1d489b063717622ea4a02aa36ef9ba",
+  "created_at": 1675006997,
+  "kind": 777,
+  "tags": [
+    [
+      "e",
+      "f6389df391619512d900f144189e028ee3ac12d846812d4c8f9da869a726d8b0"
+    ]
+  ],
+  "content": "{\"title\":\"[Test] Great shoes for sale\",\"description\":\"Giving them away for a great price. Price is negotiable. We could meet up in New York to hand over the shoes.\",\"author\":\"\",\"images\":[\"https://images.unsplash.com/photo-1549298916-b41d501d3772\"],\"price\":53,\"currency\":\"dollar\",\"location_city\":\"New York, NY, US\"}",
+  "sig": "6791d1557ece411d7a008b9473d87c134a3ee303bcba6addcdf9dade76a02ae1e348e21c0f7e1cb0c660944c652d30c9df55bb24cf9ad4b9a3cabdd109ab0413"
+}
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Image hosting
+(TBD)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Categories
+(TBD)

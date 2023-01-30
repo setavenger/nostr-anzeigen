@@ -1,7 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {eventTag, relayURL} from "../constants";
+import {eventTag} from "../constants";
 import Ad from "./Ad";
-import {relayInit} from 'nostr-tools'
+import relay from "../background/relay-management";
+import NewAdForm from "./NewAdForm";
+import Account from "./Account";
+
 
 const Sidebar = () => (
     <aside className="w-64 bg-gray-900 text-white py-10 px-6">
@@ -24,14 +27,16 @@ const Sidebar = () => (
 const Content = ({ads}) => (
     <main className="flex-1 bg-gray-200 py-10 px-6 min-h-screen">
         <h1 className="text-3xl font-medium mb-6">Welcome to Sats Kleinanzeigen</h1>
-        <p className="text-gray-700">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Vivamus auctor sapien at ex molestie, a blandit ligula pellentesque.
-        </p>
 
-        <div className={"grid grid-cols-2 gap-5"}>
-            {(ads.length > 0) && ads.map(item => (
-                (item["Title"] !== "") ? <div className={"mb-5"}><Ad item={item}/></div> : null
+        <Account/>
+        <NewAdForm/>
+
+        <div className={"grid grid-cols-2 gap-5 mt-10"}>
+            {(ads.length > 0) && ads.map((item, index) => (
+                (item.hasOwnProperty('title')) ?
+                    <div key={item.id + "-div" + index} className={"mb-5"}>
+                        <Ad key={item.id + "-" + index} item={item}/>
+                    </div> : null
             ))}
         </div>
     </main>
@@ -40,24 +45,20 @@ const Content = ({ads}) => (
 const Layout = () => {
 
     const [ads, setAds] = useState([])
-    const [socket, setSocket] = useState(null);
+
+
+    function checkId(array, ad) {
+        return array.find(item => item.id === ad.id)
+    }
+
 
     function parseAdContent(event) {
         return JSON.parse(event.content)
     }
 
+
     useEffect(() => {
         setAds([])
-
-        const relay = relayInit(relayURL)
-        relay.connect().then(() => {})
-
-        relay.on('connect', () => {
-            console.log(`connected to ${relay.url}`)
-        })
-        relay.on('error', () => {
-            console.log(`failed to connect to ${relay.url}`)
-        })
 
         // let's query for an event that exists
         let sub = relay.sub([
@@ -66,14 +67,20 @@ const Layout = () => {
             }
         ])
         sub.on('event', event => {
-            // console.log('we got the event we wanted:', event)
-            console.log(parseAdContent(event))
-            setAds(prevAds =>[...prevAds, parseAdContent(event)])
+            // console.log(JSON.stringify(event))
+            // console.log(parseAdContent(event))
+
+            const ad = parseAdContent(event)
+            ad.id = event.id
+            // console.log("Ad with id:", ad)
+            if (checkId(ads, ad) === undefined) {
+                setAds(prevAds => [...prevAds, ad])
+            }
         })
         sub.on('eose', () => {
             sub.unsub()
         })
-        setSocket(relay)
+
 
     }, []);
 
