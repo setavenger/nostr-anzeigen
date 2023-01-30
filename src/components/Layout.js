@@ -1,34 +1,21 @@
 import React, {useEffect, useState} from 'react';
 import {eventTag} from "../constants";
 import Ad from "./Ad";
-import relay from "../background/relay-management";
+import relays from "../background/relay-management";
 import NewAdForm from "./NewAdForm";
 import Account from "./Account";
+import Sidebar from "./Sidebar";
+import RelayManagement from "./RelayManagement";
 
 
-const Sidebar = () => (
-    <aside className="w-64 bg-gray-900 text-white py-10 px-6">
-        <nav>
-            <ul>
-                <li className="mb-6">
-                    <a href="#" className="text-white font-medium hover:text-gray-400">Home</a>
-                </li>
-                <li className="mb-6">
-                    <a href="#" className="text-white font-medium hover:text-gray-400">About</a>
-                </li>
-                <li className="mb-6">
-                    <a href="#" className="text-white font-medium hover:text-gray-400">Contact</a>
-                </li>
-            </ul>
-        </nav>
-    </aside>
-);
+let ids = []
 
 const Content = ({ads}) => (
     <main className="flex-1 bg-gray-200 py-10 px-6 min-h-screen">
-        <h1 className="text-3xl font-medium mb-6">Welcome to Sats Kleinanzeigen</h1>
+        <h1 className="text-3xl font-medium mb-6">Welcome to Nostr Anzeigen</h1>
 
         <Account/>
+        <RelayManagement/>
         <NewAdForm/>
 
         <div className={"grid grid-cols-2 gap-5 mt-10"}>
@@ -48,8 +35,15 @@ const Layout = () => {
 
 
     function checkId(array, ad) {
-        return array.find(item => item.id === ad.id)
+        return array.find(function (item) {
+            return item.id !== ad.id
+        })
     }
+
+    const findById = id => ads.find(function (ad) {
+        console.log(ad.id, "===", id)
+        return ad.id === id;
+    });
 
 
     function parseAdContent(event) {
@@ -59,26 +53,35 @@ const Layout = () => {
 
     useEffect(() => {
         setAds([])
+        ids = []
 
-        // let's query for an event that exists
-        let sub = relay.sub([
-            {
-                "#e": [eventTag]
-            }
-        ])
-        sub.on('event', event => {
-            // console.log(JSON.stringify(event))
-            // console.log(parseAdContent(event))
+        relays.map((relay) => {
+            // let's query for an event that exists
+            let sub = relay.sub([
+                {
+                    "#e": [eventTag]
+                }
+            ])
+            sub.on('event', event => {
+                // console.log(`Event from ${relay.url}` + event)
+                // console.log(parseAdContent(event))
 
-            const ad = parseAdContent(event)
-            ad.id = event.id
-            // console.log("Ad with id:", ad)
-            if (checkId(ads, ad) === undefined) {
-                setAds(prevAds => [...prevAds, ad])
-            }
-        })
-        sub.on('eose', () => {
-            sub.unsub()
+                // console.log(ids)
+                // console.log(event.id)
+
+                const ad = parseAdContent(event)
+
+                const isInArray = ids.includes(event.id);
+
+                // console.log("Ad with id:", ad)
+                if (!isInArray) {
+                    setAds(prevAds => [...prevAds, ad])
+                    ids = [...ids, event.id]
+                }
+            })
+            sub.on('eose', () => {
+                sub.unsub()
+            })
         })
 
 

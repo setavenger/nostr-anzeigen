@@ -1,6 +1,8 @@
 import {getEventHash, signEvent} from "nostr-tools";
-import relay from "./relay-management";
+import relays from "./relay-management";
 import {pk, sk} from "./account";
+import relayManagement from "./relay-management";
+import relay from "./relay-management";
 
 export function publishNewAd(item) {
 
@@ -23,7 +25,9 @@ export function publishNewAd(item) {
     }
     event.id = getEventHash(event)
     event.sig = signEvent(event, sk)
-    relay.publish(event)
-    console.log("published an event")
+    relays.map((relay) => {
+        relay.publish(event)
+        console.log(`published an event to ${relay.url}`)
+    })
 }
 

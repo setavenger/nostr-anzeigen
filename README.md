@@ -43,7 +43,7 @@ The value is the hashed value of "Sats Kleinanzeigen".
   "id": "a6fc877fe00c9d70e2994af24b114a10ccba126a91d2c9db9b07ff1a230125d9",
   "pubkey": "d7e183bbf7d61d60bdb159ac925f5dcf7d1d489b063717622ea4a02aa36ef9ba",
   "created_at": 1675006997,
-  "kind": 777,
+  "kind": 777, // todo change to more resonable kind
   "tags": [
     [
       "e",

@@ -20,7 +20,7 @@ const NewAdForm = () => {
             images: images,
             price: price,
             currency: currency,
-            locationCity: locationCity
+            location_city: locationCity
         })
     }
 
